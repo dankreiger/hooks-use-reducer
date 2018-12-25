@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import TodosContext from '../context';
+import axios from 'axios';
 
 export default function TodoList() {
   const { state, dispatch } = useContext(TodosContext);
@@ -16,9 +17,15 @@ export default function TodoList() {
             key={todo.id}
           >
             <span
-              onDoubleClick={() =>
-                dispatch({ type: 'TOGGLE_TODO', payload: todo })
-              }
+              onDoubleClick={async () => {
+                const response = await axios.patch(
+                  `${process.env.REACT_APP_NOW_URL}/${todo.id}`,
+                  {
+                    complete: !todo.complete
+                  }
+                );
+                dispatch({ type: 'TOGGLE_TODO', payload: response.data });
+              }}
               className={`flex-1 ml-12 cursor-pointer ${todo.complete &&
                 'line-through text-grey-darkest'}`}
             >
@@ -36,7 +43,12 @@ export default function TodoList() {
               />
             </button>
             <button
-              onClick={() => dispatch({ type: 'REMOVE_TODO', payload: todo })}
+              onClick={async () => {
+                await axios.delete(
+                  `${process.env.REACT_APP_NOW_URL}/${todo.id}`
+                );
+                dispatch({ type: 'REMOVE_TODO', payload: todo });
+              }}
             >
               <img
                 src="https://icon.now.sh/delete/8b0000"
